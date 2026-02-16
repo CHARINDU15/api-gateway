@@ -1,0 +1,57 @@
+_format_version: "2.1"
+_transform: true
+
+services:
+  - name: orchestration-service
+    url: http://orchestration-service:3002
+    routes:
+      - name: orchestration-routes
+        paths:
+          - /api/consignments
+          - /api/items
+        strip_path: true
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 100
+          policy: local
+      - name: cors
+        config:
+          origins: ["*"]
+          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+
+  - name: auth-service
+    url: http://auth-service:3001
+    routes:
+      - name: auth-routes
+        paths:
+          - /api/auth
+        strip_path: true
+
+  - name: notification-service
+    url: http://notification-service:3003
+    routes:
+      - name: notification-routes
+        paths:
+          - /api/notifications
+        strip_path: true
+
+  - name: delivery-service
+    url: http://delivery-service:3004
+    routes:
+      - name: delivery-routes
+        paths:
+          - /api/delivery
+        strip_path: true
+
+upstreams:
+  - name: services
+    targets:
+      - target: orchestration-service:3002
+        weight: 100
+      - target: auth-service:3001
+        weight: 100
+      - target: notification-service:3003
+        weight: 100
+      - target: delivery-service:3004
+        weight: 100

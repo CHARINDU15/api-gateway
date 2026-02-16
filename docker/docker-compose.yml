@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  kong:
+    image: kong:3.4-alpine
+    container_name: api-gateway
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+    ports:
+      - "8000:8000"   # Proxy
+      - "8443:8443"   # Proxy SSL
+      - "8001:8001"   # Admin API
+      - "8444:8444"   # Admin API SSL
+    volumes:
+      - ./kong.yml:/usr/local/kong/declarative/kong.yml
+      - ./logs:/var/log/kong
+    networks:
+      - ups-lms-network
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Kong Dashboard (optional)
+  kong-dashboard:
+    image: pgbi/kong-dashboard:latest
+    container_name: kong-dashboard
+    ports:
+      - "8080:8080"
+    environment:
+      KONG_API_URL: http://kong:8001
+    depends_on:
+      - kong
+    networks:
+      - ups-lms-network
+    restart: unless-stopped
+
+networks:
+  ups-lms-network:
+    external: true
