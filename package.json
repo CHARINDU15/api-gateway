@@ -1,0 +1,14 @@
+{
+  "name": "parcelpoint-api-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lightweight API gateway for ParcelPoint local and production-style routing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
